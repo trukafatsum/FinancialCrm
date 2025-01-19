@@ -2,7 +2,7 @@
 
 ## **Tanım**
 
-Bu proje, **kişisel finans yönetimi** için kapsamlı bir CRM uygulaması geliştirilmiştir.
+Bu projede, **kişisel finans yönetimi** için kapsamlı bir CRM uygulaması geliştirilmiştir.
 Uygulama, kullanıcıların finansal durumlarını düzenli olarak takip etmelerini sağlar. Kullanıcılar;
 
 - Banka bakiyelerini,
