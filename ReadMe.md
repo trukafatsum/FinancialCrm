@@ -119,8 +119,7 @@ Detaylı kullanım rehberi için dökümantasyon dosyasını inceleyebilirsiniz.
 
 ## Katkıda Bulunanlar
 
-Türkçe kaynak ve yazılım sektörüne olan katkılarından dolayı, aynı zamanda bu projenin geliştirilmesinde
-önemli bir rol oynayan [@Murat Yücedağ](https://github.com/MuratYucedag) hocamıza teşekkür ederim.
+Türkçe kaynak ve yazılım sektörüne olan katkılarından dolayı,<br/>aynı zamanda bu projenin geliştirilmesinde önemli bir rol oynayan [@Murat Yücedağ](https://github.com/MuratYucedag) hocamıza teşekkür ederim.
 
 YouTube üzerinde ücretsiz olarak yayımladığı [**C# Proje Kampı**](https://www.youtube.com/playlist?list=PLKnjBHu2xXNPmFMvGKVHA_ijjrgUyNIXr) serisinin ilerleyen bölümlerinde bu projeye başlama fırsatı buldum ve temellerini attım.
 
