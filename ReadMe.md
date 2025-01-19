@@ -45,7 +45,8 @@ Ardından  `FinancialCrmDb` içerisinden query ile veya *.bak dosyası ile veri 
 
 ## **Kullanım (Usage)**
 
-Uygulamanın kullanımına dair detaylı bilgiler, proje dökümanları `.\docs` arasında yer almaktadır. Ana kullanım adımları şunlardır:
+Uygulamanın kullanımına dair detaylı bilgiler, proje dökümanları `.\docs` arasında yer almaktadır.
+Ana kullanım adımları şunlardır:
 
 1. **Uygulamayı Başlatma**
    `bin\release\` klasöründeki `FinancialCrm.exe` dosyasını çalıştırarak uygulamayı başlatabilirsiniz.
@@ -107,6 +108,7 @@ Detaylı kullanım rehberi için dökümantasyon dosyasını inceleyebilirsiniz.
 ## Katkıda Bulunanlar
 
 Türkçe kaynak ve yazılım sektörüne olan katkılarından dolayı, aynı zamanda bu projenin geliştirilmesinde önemli bir rol oynayan @Murat Yücedağ hocamıza teşekkür ederim.
+
 YouTube üzerinde ücretsiz olarak yayımladığı **C# Proje Kampı** serisinin ilerleyen bölümlerinde bu projeye başlama fırsatı buldum ve temellerini attım.
 
 ---
