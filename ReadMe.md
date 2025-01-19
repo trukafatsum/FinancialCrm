@@ -46,6 +46,7 @@ Ardından  `FinancialCrmDb` içerisinden query ile veya *.bak dosyası ile veri 
 ## **Kullanım (Usage)**
 
 Uygulamanın kullanımına dair detaylı bilgiler, proje dökümanları `.\docs` arasında yer almaktadır.
+
 Ana kullanım adımları şunlardır:
 
 1. **Uygulamayı Başlatma**
