@@ -71,7 +71,15 @@ Detaylı kullanım rehberi için dökümantasyon dosyasını inceleyebilirsiniz.
 
 ## Ekran Görüntüleri & GIF'ler
 
-![Dashboard Görseli](./screenshots/dashboard.png)
+![Veri Tabanı Konfigürasyon Görseli](./ScreenShots/DatabaseConfigScreen.png)
+![Giriş Ekranı Görseli](./ScreenShots/LoginScreen.png)
+![Ana Ekran:Dashborad Verili Görseli](./ScreenShots/DashboardDefaultValues.png)
+![Ana Ekran:Kategoriler Görseli](./ScreenShots/CategoriesScreen.png)
+![Ana Ekran:Bankalar Görseli](./ScreenShots/BanksScreen.png)
+![Ana Ekran:Faturalar Görseli](./ScreenShots/BillsScreen.png)
+![Ana Ekran:Giderler Görseli](./ScreenShots/SpendingsScreen.png)
+![Ana Ekran:Banka Hareketleri Görseli](./ScreenShots/BankProcessScreen.png)
+![Ana Ekran:Ayarlar Görseli](./ScreenShots/SettingsScreen.png)
 
 
 ---
