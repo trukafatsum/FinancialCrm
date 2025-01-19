@@ -39,13 +39,14 @@ Uygulama, kullanıcıların finansal durumlarını düzenli olarak takip etmeler
 Proje dosyalarını bilgisayarınıza indiriniz.
 
 Proje SQL Server veri tabanı ile çalışmaktadır. Öncelikle SQL Server ve Management Studio kurulması gerekmektedir.
-Ardından  `FinancialCrmDb` içerisinden query ile veya *.bak dosyası ile veri tabanını kurunuz.  Ayrıntılı bilgi için `.\FinancialCrmDb\readme.md` dosyasını inceleyebilirsiniz.
+
+Ardından  `FinancialCrmDb` içerisinden query ile veya *.bak dosyası ile veri tabanını kurunuz.  Ayrıntılı bilgi için [./FinancialCrmDb/readme.md](./FinancialCrmDb/readme.md) dosyasını inceleyebilirsiniz.
 
 ---
 
 ## **Kullanım (Usage)**
 
-Uygulamanın kullanımına dair detaylı bilgiler, proje dökümanları `.\docs` arasında yer almaktadır.
+Uygulamanın kullanımına dair detaylı bilgiler, [proje dökümanları](./docs/Kullanım) arasında yer almaktadır.
 
 Ana kullanım adımları şunlardır:
 
@@ -124,4 +125,4 @@ YouTube üzerinde ücretsiz olarak yayımladığı **C# Proje Kampı** serisinin
 
 ## Lisans
 
-Bu proje [MIT](LICENSE) lisansı altında yayınlanmıştır.
+Bu proje [GNU Affero General Public License v3.0](LICENSE.txt) lisansı altında yayınlanmıştır.
