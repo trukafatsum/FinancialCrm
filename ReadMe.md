@@ -3,8 +3,9 @@
 ## **Tanım**
 
 Bu projede, **kişisel finans yönetimi** için kapsamlı bir CRM uygulaması geliştirilmiştir.
-Uygulama, kullanıcıların finansal durumlarını düzenli olarak takip etmelerini sağlar. Kullanıcılar;
+Uygulama, kullanıcıların finansal durumlarını düzenli olarak takip etmelerini sağlar. 
 
+Kullanıcılar;
 - Banka bakiyelerini,
 - Faturalarını,
 - Harcamalarını ve
@@ -40,7 +41,7 @@ Proje dosyalarını bilgisayarınıza indiriniz.
 
 Proje SQL Server veri tabanı ile çalışmaktadır. Öncelikle SQL Server ve Management Studio kurulması gerekmektedir.
 
-Ardından  `FinancialCrmDb` içerisinden query ile veya *.bak dosyası ile veri tabanını kurunuz.  Ayrıntılı bilgi için [./FinancialCrmDb/readme.md](./FinancialCrmDb/readme.md) dosyasını inceleyebilirsiniz.
+Ardından  `FinancialCrmDb` içerisinden query veya *.bak dosyası ile veri tabanını kurunuz.  Ayrıntılı bilgi için [./FinancialCrmDb/readme.md](./FinancialCrmDb/readme.md) dosyasını inceleyebilirsiniz.
 
 ---
 
