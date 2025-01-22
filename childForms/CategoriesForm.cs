@@ -1,4 +1,5 @@
 ﻿using FinancialCrm.Models;
+using FinancialCrm.ValidationRules;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -56,52 +57,102 @@ namespace FinancialCrm.childForms
         private void InsertData()
         {
             string categoryName = txtCategoryName.Text;
-            if (!IsCategoryExist(categoryName)) 
+
+            // Kategori için Fluent Validation doğrulaması
+            CategoryValidator validator = new CategoryValidator();
+            var validationResult = validator.Validate(new Categories { CategoryName = categoryName });
+
+            if (!validationResult.IsValid)
             {
-                Categories categories = new Categories();
-                categories.CategoryName = categoryName;
+                // Eğer doğrulama başarısızsa, hata mesajlarını kullanıcıya göster
+                string errors = string.Join(Environment.NewLine, validationResult.Errors.Select(e => e.ErrorMessage));
+                MessageBox.Show(errors, "Geçersiz Veri", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Kategorinin zaten var olup olmadığını kontrol et
+            if (!IsCategoryExist(categoryName))
+            {
+                Categories categories = new Categories
+                {
+                    CategoryName = categoryName
+                };
+
                 db.Categories.Add(categories);
                 db.SaveChanges();
                 MessageBox.Show("Kategori sisteme eklendi.", "Kategoriler", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                MessageBox.Show("Bu kategori adı zaten sistemde kayıtlı.","Hatırlatma!",MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Bu kategori adı zaten sistemde kayıtlı.", "Hatırlatma!", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            
         }
+
 
         private void DeleteData(int id)
         {
-            if (lblInformation.Tag != null)
-            {
-                var removeValues = db.Categories.Find(id);
-                db.Categories.Remove(removeValues);
-                db.SaveChanges();
-                MessageBox.Show("Kategori bilgisi silindi.", "Kategoriler", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
+            if (lblInformation.Tag == null)
             {
                 MessageBox.Show("Lütfen tablodan ilgili veriyi seçiniz.", "Hatalı Silme", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
+
+            // Kategoriyi veritabanında arama
+            var removeValues = db.Categories.Find(id);
+
+            if (removeValues == null)
+            {
+                // Kategori bulunamadığında kullanıcıya bilgilendirme
+                MessageBox.Show("Seçilen kategori bulunamadı.", "Silme Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Silme işlemi
+            db.Categories.Remove(removeValues);
+            db.SaveChanges();
+            MessageBox.Show("Kategori bilgisi silindi.", "Kategoriler", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
 
         private void UpdateData(int id)
         {
             string categoryName = txtCategoryName.Text;
+
+            // Kategoriyi bul
             var updateValues = db.Categories.Find(id);
-            updateValues.CategoryName = categoryName;
-            if (!IsCategoryExist(categoryName,id))
+            if (updateValues == null)
             {
+                MessageBox.Show("Kategori bulunamadı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Kategori adı doğrulama
+            var categoryValidator = new CategoryValidator();
+            var validationResult = categoryValidator.Validate(new Categories { CategoryName = categoryName });
+
+            if (!validationResult.IsValid)
+            {
+                // Doğrulama hatası varsa, hata mesajlarını kullanıcıya göster
+                foreach (var failure in validationResult.Errors)
+                {
+                    MessageBox.Show(failure.ErrorMessage, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                return;
+            }
+
+            // Kategori adı kontrolü: Kendisiyle aynı kategori ismini kabul et
+            if (!IsCategoryExist(categoryName, id))
+            {
+                updateValues.CategoryName = categoryName;
                 db.SaveChanges();
-                MessageBox.Show("Kategori bilgileri güncellendi.", "Kategoriler", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Kategori bilgileri başarıyla güncellendi.", "Kategoriler", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
                 MessageBox.Show("Bu kategori adı zaten sistemde kayıtlı.", "Hatırlatma!", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
         }
+
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {

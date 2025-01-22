@@ -1,4 +1,5 @@
 ﻿using FinancialCrm.Models;
+using FinancialCrm.ValidationRules;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -49,41 +50,92 @@ namespace FinancialCrm.childForms
             string title = txtBillTitle.Text;
             string period = txtPeriod.Text;
             decimal amount;
-            if (decimal.TryParse(txtBillAmount.Text, out amount))
-            {
-                Bills bills = new Bills();
-                bills.BillTitle = title;
-                bills.BillAmount = amount;
-                bills.BillPeriod = period;
-                db.Bills.Add(bills);
-                db.SaveChanges();
-                MessageBox.Show("Ödeme bilgileri sisteme eklendi", "Ödeme & Faturalar", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
+            if (!decimal.TryParse(txtBillAmount.Text, out amount))
             {
                 MessageBox.Show("Girilen sayı uygun değil!", "Hatalı Tutar", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
+            Bills bills = new Bills
+            {
+                BillTitle = title,
+                BillAmount = amount,
+                BillPeriod = period
+            };
+
+            // Fluent Validation ile doğrulama
+            BillValidator validator = new BillValidator();
+            var validationResult = validator.Validate(bills);
+
+            if (!validationResult.IsValid)
+            {
+                string errorMessages = string.Join(Environment.NewLine, validationResult.Errors.Select(e => e.ErrorMessage));
+                MessageBox.Show(errorMessages, "Doğrulama Hatası", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Doğrulama başarılıysa veritabanına ekle
+            db.Bills.Add(bills);
+            db.SaveChanges();
+            MessageBox.Show("Ödeme bilgileri sisteme eklendi", "Ödeme & Faturalar", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
         }
         private void DeleteData(int id)
         {
             var removeValue = db.Bills.Find(id);
-            db.Bills.Remove(removeValue);
-            db.SaveChanges();
-            MessageBox.Show("Ödeme sistemden silindi", "Ödeme & Faturalar", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (removeValue != null)
+            {
+                db.Bills.Remove(removeValue);
+                db.SaveChanges();
+                MessageBox.Show("Ödeme sistemden silindi", "Ödeme & Faturalar", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Güncellenecek kayıt bulunamadı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         private void UpdateData(int id)
         {
             string title = txtBillTitle.Text;
-            decimal amount = decimal.Parse(txtBillAmount.Text);
             string period = txtPeriod.Text;
+            decimal amount;
 
+            // Giriş verilerini oluştur
+            Bills billToUpdate = new Bills
+            {
+                BillTitle = title,
+                BillPeriod = period,
+                BillAmount = decimal.TryParse(txtBillAmount.Text, out amount) ? amount : 0
+            };
+
+            // Doğrulama işlemi
+            BillValidator validator = new BillValidator();
+            var validationResult = validator.Validate(billToUpdate);
+
+            if (!validationResult.IsValid)
+            {
+                // Doğrulama hatalarını kullanıcıya göster
+                string errors = string.Join(Environment.NewLine, validationResult.Errors.Select(e => e.ErrorMessage));
+                MessageBox.Show(errors, "Geçersiz Veri", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Veritabanında güncelleme işlemi
             var values = db.Bills.Find(id);
-            values.BillTitle = title;
-            values.BillAmount = amount;
-            values.BillPeriod = period;
-            db.SaveChanges();
-            MessageBox.Show("Ödeme bilgileri güncellendi.", "Ödeme & Faturalar", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (values != null)
+            {
+                values.BillTitle = billToUpdate.BillTitle;
+                values.BillAmount = billToUpdate.BillAmount;
+                values.BillPeriod = billToUpdate.BillPeriod;
+                db.SaveChanges();
+
+                MessageBox.Show("Ödeme bilgileri güncellendi.", "Ödeme & Faturalar", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Güncellenecek kayıt bulunamadı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
         private void btnList_Click(object sender, EventArgs e)
         {
             GetDataGridValues();

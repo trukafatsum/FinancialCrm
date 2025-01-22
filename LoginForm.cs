@@ -131,7 +131,17 @@ namespace FinancialCrm
             string username = txtUsername.Text;
             string password = txtPassword.Text;
             int userId;
-            if (!db.Users.Any(x => x.Username == username))
+            if (!db.Users.Any())
+            {
+                userId = -1;
+                Properties.Settings.Default.IsLoggedOut = false;
+                Properties.Settings.Default.Save();
+                MainForm mainForm = new MainForm(userId, this);
+                mainForm.Show();
+                SetTextBoxDefaultValues();
+                this.Hide();
+            }
+            else if (!db.Users.Any(x => x.Username == username))
             {
                 lblInformation.Text = "Kullanıcı adı geçersiz.";
             }
@@ -141,10 +151,10 @@ namespace FinancialCrm
             }
             else
             {
-                userId = db.Users.Where(x=>x.Username == username && x.Password == password).Select(x => x.UserId).FirstOrDefault();
+                userId = db.Users.Where(x => x.Username == username && x.Password == password).Select(x => x.UserId).FirstOrDefault();
                 Properties.Settings.Default.IsLoggedOut = false;
                 Properties.Settings.Default.Save();
-                MainForm mainForm = new MainForm(userId,this);
+                MainForm mainForm = new MainForm(userId, this);
                 mainForm.Show();
                 SetTextBoxDefaultValues();
                 this.Hide();

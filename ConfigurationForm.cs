@@ -1,6 +1,9 @@
-﻿using System;
+﻿using FinancialCrm.Models;
+using FinancialCrm.ValidationRules;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -187,37 +190,43 @@ namespace FinancialCrm
             MessageBox.Show("Değerler başarıyla kaydedildi.\nUygulamayı yeniden başlatılacaktır.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void dataGridViewDatabase_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            LoadDatabaseValuesToTextBoxes();
-        }
+        private void dataGridViewDatabase_CellClick(object sender, DataGridViewCellEventArgs e) => LoadDatabaseValuesToTextBoxes();
 
         private void btnSaveProperties_Click(object sender, EventArgs e)
         {
-            string dataSource = txtDataSource.Text;
-            string initialCatalog = txtInitialCatalog.Text;
-            bool integratedSecurity = checkIntegratedSecurity.Checked;
-            string userId = txtUserId.Text;
-            string password = txtPassword.Text;
-            bool trustedservercertificate = checkTrustedServerCertificate.Checked;
-
-            if (!TestDatabaseConnection(dataSource, initialCatalog, integratedSecurity, userId, password, trustedservercertificate))
+            var values = new DBConnection
             {
-                btnInformation.Text = "Bağlantı başarısız! Bilgileri kontrol edin.";
+                DataSource = txtDataSource.Text,
+                InitialCatalog = txtInitialCatalog.Text,
+                UserId = txtUserId.Text,
+                Password = txtPassword.Text,
+                IntegratedSecurity = checkIntegratedSecurity.Checked,
+                TrustedServerCertificate = checkTrustedServerCertificate.Checked,
+            };
+            var validator = new DBConnectionValidator();
+            var validationResult = validator.Validate(values);
+
+            if (validationResult.IsValid)
+            {
+
+                SaveValuesToProperties();
+                GetDatabaseValues();
+                lblChildInformation.Visible = IsChild;
+                lblChildInformation.ForeColor = Color.Green;
+                lblChildInformation.Text = "Bağlantı başarılı.\nAyarlar default olarak kayıt edildi.";
+                UpdateEntityFrameworkConnectionString();
+                Application.Restart();
+            }
+            else
+            {
+                btnInformation.Text = string.Join("\n", validationResult);
                 btnInformation.ForeColor = Color.Yellow;
                 btnInformation.IconColor = Color.Yellow;
                 lblChildInformation.Visible = IsChild;
-                lblChildInformation.Text = "Bağlantı başarısız!\nBilgileri kontrol edin.";
+                lblChildInformation.Text = string.Join ("\n", validationResult);
                 lblChildInformation.ForeColor = Color.Red;
                 return;
             }
-            SaveValuesToProperties();
-            GetDatabaseValues();
-            lblChildInformation.Visible = IsChild;
-            lblChildInformation.ForeColor = Color.Green;
-            lblChildInformation.Text = "Bağlantı başarılı.\nAyarlar default olarak kayıt edildi.";
-            UpdateEntityFrameworkConnectionString();
-            Application.Restart();
         }
 
         private void UpdateEntityFrameworkConnectionString()
@@ -282,29 +291,6 @@ namespace FinancialCrm
             {
                 // Hata oluşursa false döner
                 //MessageBox.Show($"Veritabanı bağlantı testi başarısız: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-        }
-        private bool TestDatabaseConnection(string dataSource, string initialCatalog, bool integratedSecurity, string userId, string password, bool trustedservercertificate)
-        {
-            // Yeni connection string değerlerini oluştur
-            string newProviderConnectionString = $"data source={dataSource};" +
-                                                 $"initial catalog={initialCatalog};" +
-                                                 $"integrated security={integratedSecurity};" +
-                                                 $"user id={userId};" +
-                                                 $"password={password};" +
-                                                 $"trustservercertificate={trustedservercertificate};MultipleActiveResultSets=True;App=EntityFramework";
-            try
-            {
-                // Bağlantıyı kontrol et
-                using (var connection = new SqlConnection(newProviderConnectionString))
-                {
-                    connection.Open(); // Bağlantıyı açmayı dener
-                }
-                return true; // Başarılı
-            }
-            catch (Exception ex)
-            {
                 return false;
             }
         }

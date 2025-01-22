@@ -1,4 +1,5 @@
 ﻿using FinancialCrm.Models;
+using FinancialCrm.ValidationRules;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -80,59 +81,171 @@ namespace FinancialCrm.childForms
                 return db.Users.Any(x => x.Username == userName);
             }
         }
+        private bool VerifyUserPassword(int id)
+        {
+            // Kullanıcıdan şifre girmesini istiyoruz
+            string inputPassword = InputBox("Kayıtlı şifrenizi giriniz","Doğrulama",this.Icon);
+            return db.Users.Any(x=>x.UserId == id && x.Password == inputPassword);
+        }
+        public static string InputBox(string prompt, string title, Icon icon)
+        {
+            Form form = new Form();
+            Label label = new Label();
+            TextBox textBox = new TextBox();
+            Button buttonOk = new Button();
+            Button buttonCancel = new Button();
+
+            form.Text = title;
+            label.Text = prompt;
+            textBox.Text = "";
+            form.Icon = icon;
+
+
+            buttonOk.Text = "Accept";
+            buttonCancel.Text = "Decline";
+            buttonOk.DialogResult = DialogResult.OK;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+
+            label.SetBounds(9, 20, 372, 13);
+            textBox.SetBounds(12, 36, 372, 20);
+            buttonOk.SetBounds(228, 72, 75, 23);
+            buttonCancel.SetBounds(309, 72, 75, 23);
+
+            label.AutoSize = true;
+            textBox.Anchor = textBox.Anchor | AnchorStyles.Right;
+            buttonOk.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+
+            form.ClientSize = new System.Drawing.Size(396, 107);
+            form.Controls.AddRange(new Control[] { label, textBox, buttonOk, buttonCancel });
+            form.ClientSize = new System.Drawing.Size(Math.Max(300, label.Right + 10), form.ClientSize.Height);
+            form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            form.StartPosition = FormStartPosition.CenterScreen;
+            form.MinimizeBox = false;
+            form.MaximizeBox = false;
+            form.AcceptButton = buttonOk;
+            form.CancelButton = buttonCancel;
+
+            DialogResult dialogResult = form.ShowDialog();
+            return dialogResult == DialogResult.OK ? textBox.Text : null;
+        }
+
         private void InsertData()
         {
-            string firstName, lastName, userName, password;
-            bool status;
-            userName = txtUserName.Text;
-            password = txtUserPassword.Text;
-            firstName = txtFirstName.Text;
-            lastName = txtLastName.Text;
-            status = FontAwesome.Sharp.IconChar.ToggleOn == btnStatus.IconChar;
-            if (!IsUserExist(userName))
+            string firstName = txtFirstName.Text;
+            string lastName = txtLastName.Text;
+            string userName = txtUserName.Text;
+            string password = txtUserPassword.Text;
+            bool status = FontAwesome.Sharp.IconChar.ToggleOn == btnStatus.IconChar;
+
+            // UserValidator sınıfı ile kullanıcı bilgilerini doğrula
+            UserValidator validator = new UserValidator();
+            Users newUser = new Users()
             {
-                Users user = new Users()
+                FirstName = firstName,
+                LastName = lastName,
+                Username = userName,
+                Password = password,
+                Status = status
+            };
+
+            var validationResult = validator.Validate(newUser);
+
+            if (validationResult.IsValid) // Eğer doğrulama başarılıysa, kullanıcıyı kaydedebilirsin
+            {
+                if (!IsUserExist(userName)) // Kullanıcı adı daha önce alınmamışsa
                 {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    Username = userName,
-                    Password = password,
-                    Status = status
-                };
-                db.Users.Add(user);
-                db.SaveChanges();
-                MessageBox.Show("Kullanıcı bilgileri sisteme eklendi!", "Bilgilendirme", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    db.Users.Add(newUser);
+                    db.SaveChanges();
+                    MessageBox.Show("Kullanıcı bilgileri sisteme eklendi!", "Bilgilendirme", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Ekleme başarısız!\nKullanıcı adı sistemde zaten kayıtlı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
-            else
+            else // Eğer doğrulama hatalıysa
             {
-                MessageBox.Show("Ekleme başarısız!\nKullanıcı adı sistemde zaten kayıtlı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                // Hataları kullanıcıya göster
+                string errorMessage = string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage));
+                MessageBox.Show(errorMessage, "Doğrulama Hataları", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             GetUserDataValues();
         }
         private void DeletePassiveData(int id)
         {
             var values = db.Users.Find(id);
+            if (values == null)
+            {
+                MessageBox.Show("Kullanıcı bulunamadı","Hata",MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             values.Status = false;
             db.SaveChanges();
             MessageBox.Show("Kullanıcı durumu pasif hale getirildi!", "Bilgilendirme", MessageBoxButtons.OK, MessageBoxIcon.Information);
             GetUserDataValues();
         }
+        private void DeleteData(int id)
+        {
+            var values = db.Users.Find(id);
+            if (values == null)
+            {
+                MessageBox.Show("Kullanıcı bulunamadı", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            else if (VerifyUserPassword(id))
+            {
+                db.Users.Remove(values);
+                db.SaveChanges();
+
+                MessageBox.Show("Kullanıcı kalıcı olarak silindi.", "Bilgilendirme", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Sistemde kayıtlı eski şifreniz ile tekrar deneyin!", "Doğrulama Başarısız", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+            }
+        }
         private void UpdateData(int id)
         {
             var updateValues = db.Users.Find(id);
+            if (updateValues == null)
+            {
+                MessageBox.Show("Kullanıcı bulunamadı", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             updateValues.Username = txtUserName.Text;
             updateValues.FirstName = txtFirstName.Text;
             updateValues.LastName = txtLastName.Text;
             updateValues.Password = txtUserPassword.Text;
             updateValues.Status = btnStatus.IconChar == FontAwesome.Sharp.IconChar.ToggleOn;
-            if (!IsUserExist(updateValues.Username,id))
+
+            UserValidator validator = new UserValidator();
+            var validationResult = validator.Validate(updateValues);
+
+            if (validationResult.IsValid)
             {
-                db.SaveChanges();
-                MessageBox.Show("Kullanıcı bilgileri güncellendi!", "Bilgilendirme", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (!IsUserExist(updateValues.Username, id))
+                {
+                    if(VerifyUserPassword(id))
+                    {
+                        db.SaveChanges();
+                        MessageBox.Show("Kullanıcı bilgileri güncellendi!", "Bilgilendirme", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Sistemde kayıtlı eski şifreniz ile tekrar deneyin!","Doğrulama Başarısız",MessageBoxButtons.OK,MessageBoxIcon.Hand);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Bu kullanıcı adı başka bir kullanıcı tarafından kullanılıyor!", "Bilgilendirme", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             else
             {
-                MessageBox.Show("Bu kullanıcı adı başka bir kullanıcı tarafından kullanılıyor!","Bilgilendirme",MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Hataları kullanıcıya göster
+                string errorMessage = string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage));
+                MessageBox.Show(errorMessage, "Doğrulama Hataları", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             GetUserDataValues();
         }
@@ -157,7 +270,25 @@ namespace FinancialCrm.childForms
             int id;
             if (int.TryParse(numUpDownID.Value.ToString(), out id))
             {
-                DeletePassiveData(id);
+                // Kullanıcıya kalıcı silme veya pasif hale getirme işlemi için seçim yapma imkanı ver
+                DialogResult result = MessageBox.Show("Kullanıcıyı kalıcı olarak silmek mi istiyorsunuz?\nAksi takdirde pasif hale getirilecektir.",
+                                                      "Silme İşlemi", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+                // Eğer kullanıcı "Evet" seçerse, kalıcı silme işlemi yapılır
+                if (result == DialogResult.Yes)
+                {
+                    DeleteData(id);  // Kalıcı silme
+                }
+                // Eğer kullanıcı "Hayır" seçerse, sadece pasif hale getirilir
+                else if (result == DialogResult.No)
+                {
+                    DeletePassiveData(id);  // Pasif hale getirme
+                }
+                // Eğer kullanıcı "İptal" seçerse, hiçbir işlem yapılmaz
+                else
+                {
+                    MessageBox.Show("Silme işlemi iptal edildi.", "İptal Edildi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             else
             {

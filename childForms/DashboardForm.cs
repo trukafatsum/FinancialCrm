@@ -44,13 +44,21 @@ namespace FinancialCrm.childForms
         }
         private void GetGreetingsValues()
         {
-            var values = db.Users.Where(x => x.UserId == userId).Select(x => new
+            if(userId == -1)
             {
-                x.Username,
-                x.FirstName,
-                x.LastName
-            }).FirstOrDefault();
-            lblGreetingsMessage.Text = $"Hoş geldiniz, {values.FirstName} {values.LastName}!";
+                lblGreetingsMessage.Text = "Hoşgeldiniz, Misafir!";
+            }
+            else
+            {
+                var values = db.Users.Where(x => x.UserId == userId).Select(x => new
+                {
+                    x.Username,
+                    x.FirstName,
+                    x.LastName
+                }).FirstOrDefault();
+
+                lblGreetingsMessage.Text = $"Hoş geldiniz, {values.FirstName} {values.LastName}!";
+            }
         }
         private void GetContentValues1()
         {

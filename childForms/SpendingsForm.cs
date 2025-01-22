@@ -1,4 +1,5 @@
 ﻿using FinancialCrm.Models;
+using FinancialCrm.ValidationRules;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,12 +23,13 @@ namespace FinancialCrm.childForms
         }
         private void GetDataGridValues()
         {
-            var values = db.Spendings.Select(x=> new { 
-            x.SpendingId,
-            x.SpendingTitle,
-            x.SpendingAmount,
-            x.SpendingDate,
-            x.Categories.CategoryName,
+            var values = db.Spendings.Select(x => new
+            {
+                x.SpendingId,
+                x.SpendingTitle,
+                x.SpendingAmount,
+                x.SpendingDate,
+                x.Categories.CategoryName,
             }).ToList();
             dataGridView1.DataSource = values;
             dataGridView1.Columns["SpendingId"].Visible = false;
@@ -46,11 +48,11 @@ namespace FinancialCrm.childForms
         private void SetDefaultChart()
         {
             var values = db.Spendings.GroupBy(x => x.Categories.CategoryName)
-                .Select(g=> new
-            {
-                CategoryName = g.Key,
-                TotalSpending = g.Sum(x=>x.SpendingAmount)
-            }).ToList();
+                .Select(g => new
+                {
+                    CategoryName = g.Key,
+                    TotalSpending = g.Sum(x => x.SpendingAmount)
+                }).ToList();
 
             double totalSpendingAll = values.Sum(v => (double)v.TotalSpending);
 
@@ -59,10 +61,10 @@ namespace FinancialCrm.childForms
 
             Series series = new Series("Harcamalar")
             {
-                ChartType=SeriesChartType.Pie,
-                IsValueShownAsLabel=true,
+                ChartType = SeriesChartType.Pie,
+                IsValueShownAsLabel = true,
                 LabelFormat = "{0:N2}%",
-                Font = new System.Drawing.Font(Font.FontFamily,Font.Size,FontStyle.Bold)
+                Font = new System.Drawing.Font(Font.FontFamily, Font.Size, FontStyle.Bold)
             };
 
             var colorPalette = new List<System.Drawing.Color>
@@ -85,7 +87,7 @@ namespace FinancialCrm.childForms
                     YValues = new double[] { (double)item.TotalSpending },
                     Label = $"{item.CategoryName}\n{percentage:N2}%"
                 };
-                dp.Color = colorPalette[colorIndex%colorPalette.Count];
+                dp.Color = colorPalette[colorIndex % colorPalette.Count];
                 colorIndex++;
                 series.Points.Add(dp);
             }
@@ -94,7 +96,7 @@ namespace FinancialCrm.childForms
                 Color pointColor = point.Color;
                 double brightness = pointColor.GetBrightness();
 
-                if(brightness < 0.5)
+                if (brightness < 0.5)
                 {
                     point.LabelForeColor = Color.Moccasin;
                 }
@@ -152,29 +154,73 @@ namespace FinancialCrm.childForms
             decimal amount;
             DateTime date;
             int categoryID;
-            if (decimal.TryParse(txtSpendingAmount.Text,out amount) && DateTime.TryParse(txtDate.Text,out date) && int.TryParse(cmbCategories.SelectedValue.ToString(),out categoryID))
+
+            // Kullanıcıdan gelen verileri doğrulama
+            if (decimal.TryParse(txtSpendingAmount.Text, out amount) &&
+                DateTime.TryParse(txtDate.Text, out date) &&
+                int.TryParse(cmbCategories.SelectedValue.ToString(), out categoryID))
             {
+                // Yeni harcama nesnesi oluştur
                 Spendings spendings = new Spendings();
                 spendings.SpendingTitle = title;
                 spendings.SpendingAmount = amount;
                 spendings.SpendingDate = date;
                 spendings.CategoryId = categoryID;
-                db.Spendings.Add(spendings);
-                db.SaveChanges();
-                MessageBox.Show("Harcama bilgileri sisteme eklendi.","Gider & Harcamalar",MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // FluentValidation kullanarak doğrulama
+                var spendingValidator = new SpendingValidator();
+                var validationResult = spendingValidator.Validate(spendings);
+
+                if (validationResult.IsValid)
+                {
+                    db.Spendings.Add(spendings);
+                    db.SaveChanges();
+                    MessageBox.Show("Harcama bilgileri sisteme eklendi.", "Gider & Harcamalar", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Eğer doğrulama hatalıysa, hataları kullanıcıya göster
+                    foreach (var failure in validationResult.Errors)
+                    {
+                        MessageBox.Show(failure.ErrorMessage, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
             else
             {
-                MessageBox.Show("Girilen bilgileri tekrar kontrol ediniz.","Başarısız Ekleme",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                MessageBox.Show("Girilen bilgileri tekrar kontrol ediniz.", "Başarısız Ekleme", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
         private void DeleteData(int id)
         {
+            // Silinecek harcamanın veritabanında mevcut olup olmadığını kontrol et
             var removeValue = db.Spendings.Find(id);
-            db.Spendings.Remove(removeValue);
-            db.SaveChanges();
-            MessageBox.Show("Harcama sistemden silindi.","Gider & Harcamalar",MessageBoxButtons.OK,MessageBoxIcon.Information);
+
+            // Eğer harcama bulunamazsa
+            if (removeValue == null)
+            {
+                MessageBox.Show("Harcama kaydı bulunamadı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Silme işleminden önce kullanıcıdan onay al
+            var confirmResult = MessageBox.Show("Bu harcamayı silmek istediğinizden emin misiniz?", "Silme Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (confirmResult == DialogResult.Yes)
+            {
+                // Harcama kaydını sil
+                db.Spendings.Remove(removeValue);
+                db.SaveChanges();
+                MessageBox.Show("Harcama sistemden silindi.", "Gider & Harcamalar", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                // Silme işlemi iptal edildiğinde
+                MessageBox.Show("Silme işlemi iptal edildi.", "İptal", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
+
         private void UpdateData(int id)
         {
             string title = txtSpendingTitle.Text;
@@ -182,19 +228,42 @@ namespace FinancialCrm.childForms
             DateTime date;
             int categoryID;
             var values = db.Spendings.Find(id);
-            if(decimal.TryParse(txtSpendingAmount.Text, out amount) && DateTime.TryParse(txtDate.Text, out date) && int.TryParse(cmbCategories.SelectedValue.ToString(), out categoryID))
+            if (values == null)
             {
-                values.SpendingTitle = title;
-                values.SpendingAmount = amount;
-                values.SpendingDate = date;
-                values.CategoryId = categoryID;
+                MessageBox.Show("Harcama kaydı bulunamadı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            // Girilen verilerin geçerliliğini kontrol ediyoruz
+            bool isAmountValid = decimal.TryParse(txtSpendingAmount.Text, out amount);
+            bool isDateValid = DateTime.TryParse(txtDate.Text, out date);
+            bool isCategoryValid = int.TryParse(cmbCategories.SelectedValue.ToString(), out categoryID);
+
+            // Eğer herhangi bir alan geçerli değilse, hata mesajı gösteriyoruz
+            if (!isAmountValid || !isDateValid || !isCategoryValid)
+            {
+                MessageBox.Show("Girilen verileri tekrar gözden geçirin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            values.SpendingTitle = title;
+            values.SpendingAmount = amount;
+            values.SpendingDate = date;
+            values.CategoryId = categoryID;
+
+            SpendingValidator validator = new SpendingValidator();
+            var validationResult = validator.Validate(values);
+            if (validationResult.IsValid)
+            {
                 db.SaveChanges();
-                MessageBox.Show("Harcama bilgileri güncellendi.","Gider & Harcamalar",MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Harcama bilgileri güncellendi.", "Gider & Harcamalar", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                MessageBox.Show("Girilen verileri tekrar gözden geçirin!","Uyarı",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                // Hataları kullanıcıya gösteriyoruz
+                string errorMessage = string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage));
+                MessageBox.Show(errorMessage, "Doğrulama Hataları", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+
         }
 
         private void SpendingsForm_Load(object sender, EventArgs e)

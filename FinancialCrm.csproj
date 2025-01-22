@@ -58,6 +58,9 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="FluentValidation, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7de548da2fbae0f0, processorArchitecture=MSIL">
+      <HintPath>packages\FluentValidation.9.5.4\lib\net461\FluentValidation.dll</HintPath>
+    </Reference>
     <Reference Include="FontAwesome.Sharp, Version=6.6.0.0, Culture=neutral, PublicKeyToken=d16d1e4e568ec10f, processorArchitecture=MSIL">
       <HintPath>packages\FontAwesome.Sharp.6.6.0\lib\net472\FontAwesome.Sharp.dll</HintPath>
     </Reference>
@@ -155,6 +158,7 @@
     <Compile Include="Models\Categories.cs">
       <DependentUpon>FinancialCrmDb.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\DBConnection.cs" />
     <Compile Include="Models\FinancialCrmDb.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -181,6 +185,13 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ValidationRules\BankProcessValidator.cs" />
+    <Compile Include="ValidationRules\BankValidator.cs" />
+    <Compile Include="ValidationRules\BillValidator.cs" />
+    <Compile Include="ValidationRules\CategoryValidator.cs" />
+    <Compile Include="ValidationRules\DBConnectionValidator.cs" />
+    <Compile Include="ValidationRules\SpendingValidator.cs" />
+    <Compile Include="ValidationRules\UserValidator.cs" />
     <EmbeddedResource Include="Resources\LoginImage.png" />
     <EmbeddedResource Include="childForms\BankProcessesForm.resx">
       <DependentUpon>BankProcessesForm.cs</DependentUpon>
@@ -279,5 +290,6 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
