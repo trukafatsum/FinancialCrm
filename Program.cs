@@ -26,6 +26,7 @@ namespace FinancialCrm
             {
                 Application.Run(new ConfigurationForm());
             }
+            //Application.Run(new TestForm());
         }
         static bool IsConnectionCorrect()
         {
