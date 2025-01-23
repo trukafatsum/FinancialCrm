@@ -109,10 +109,12 @@ Detaylı kullanım rehberi için dökümantasyon dosyasını inceleyebilirsiniz.
 
 ## Bilinen Sorunlar ve Geliştirme Yol Haritası
 
-* İlk kullanım için kullanıcı bilgileri tanımlama *
-* Banka verilerine ilişkin (listeleme, ekleme, silme, güncelleme) işlemleri *
-* Banka hareketleri verilerine ilişkin (listeleme, ekleme, silme, güncelleme) işlemleri *
-* Dashboard ekranında gösterilecek içerikleri arttırma *
+* [x] İlk kullanım için kullanıcı bilgileri olmaksızın giriş yapabilme (Login) *
+* [x] Kullanıcı bilgilerinin silinmesi veya güncellenmesine yönelik güvenlik önlemi alındı (Doğrulama)
+* [x] Fluent Validation eklendi, validasyon işlemleri uygulandı
+* [ ] Banka verilerine ilişkin (listeleme, ekleme, silme, güncelleme) işlemleri *
+* [ ] Banka hareketleri verilerine ilişkin (listeleme, ekleme, silme, güncelleme) işlemleri *
+* [ ] Dashboard ekranında gösterilecek içerikleri arttırma *
   
 
 ---
